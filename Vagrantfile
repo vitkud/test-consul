@@ -28,6 +28,13 @@ sudo chmod a+w /etc/consul.d
 sudo mkdir /etc/consul
 sudo chmod a+w /etc/consul
 
+echo Support WINS [https://askubuntu.com/questions/507649/ubuntu-can-not-ping-host-name-but-can-ping-ip]
+sudo apt-get install -y libnss-winbind
+sudo sed -i 's/^hosts:.*$/& wins/' /etc/nsswitch.conf
+
+echo Install Midnight Commander
+sudo apt-get install -y mc
+
 SCRIPT
 
 # Specify a Consul version
