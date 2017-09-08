@@ -38,19 +38,21 @@ DEMO_BOX_NAME = ENV['DEMO_BOX_NAME'] || "debian/jessie64"
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = DEMO_BOX_NAME
+	config.vm.box = DEMO_BOX_NAME
 
-  config.vm.provision "shell",
-                          inline: $script,
-                          env: {'CONSUL_DEMO_VERSION' => CONSUL_DEMO_VERSION}
+	config.vm.provision "shell",
+			inline: $script,
+			env: {'CONSUL_DEMO_VERSION' => CONSUL_DEMO_VERSION}
 
-  config.vm.define "n1" do |n1|
-      n1.vm.hostname = "n1"
-      n1.vm.network "private_network", ip: "172.20.20.10"
-  end
+	(1..5).each do |i|
+		config.vm.define "n#{i}" do |node|
+			node.vm.hostname = "n#{i}"
+			node.vm.network "private_network", ip: "172.20.20.#{10+i-1}"
+			node.vm.provision "shell", run: "always", inline: "nohup consul agent -server -bootstrap-expect=2 -bind=172.20.20.#{10+i-1} -data-dir=/tmp/consul -config-dir=/etc/consul.d -enable-script-checks=true >>consul.log 2>&1 &"
+			#if i > 1 then
+			#	node.vm.provision "shell", run: "always", inline: "consul join 172.20.20.10"
+			#end
+		end
+	end
 
-  config.vm.define "n2" do |n2|
-      n2.vm.hostname = "n2"
-      n2.vm.network "private_network", ip: "172.20.20.11"
-  end
 end
